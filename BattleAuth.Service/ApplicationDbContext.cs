@@ -5,7 +5,7 @@
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,7 +18,7 @@
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityUser>(entity => { entity.ToTable(name: "Users"); });
+            builder.Entity<User>(entity => { entity.ToTable(name: "Users"); });
             builder.Entity<IdentityRole>(entity => { entity.ToTable(name: "Roles"); });
             builder.Entity<IdentityUserRole<string>>(entity => { entity.ToTable("UserRoles"); });
             builder.Entity<IdentityUserClaim<string>>(entity => { entity.ToTable("UserClaims"); });

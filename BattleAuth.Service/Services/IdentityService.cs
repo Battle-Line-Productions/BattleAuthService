@@ -16,12 +16,12 @@
 
     public class IdentityService : IIdentityService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly JwtSettings _jwtSettings;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly ApplicationDbContext _context;
 
-        public IdentityService(UserManager<IdentityUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, ApplicationDbContext context)
+        public IdentityService(UserManager<User> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, ApplicationDbContext context)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
@@ -41,7 +41,7 @@
                 };
             }
 
-            var newUser = new IdentityUser
+            var newUser = new User()
             {
                 Email = email,
                 UserName = email
@@ -164,7 +164,7 @@
                        StringComparison.InvariantCultureIgnoreCase);
         }
 
-        private async Task<AuthenticationResult> GenerateAuthenticationResultForUser(IdentityUser user)
+        private async Task<AuthenticationResult> GenerateAuthenticationResultForUser(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
