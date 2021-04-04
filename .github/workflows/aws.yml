@@ -21,6 +21,15 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
+
+    - name: App Settings Variable Substitution
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: '${{env.DOTNET_ROOT}}/BattleAuth.Api/appsettings.json'
+      env:
+        DefaultConnection: ${{ secrets.BATTLE_AUTH_TEST_DB_CONNECTION_STRING }}
+        ApiKey: ${{ secrets.BATTLE_AUTH_TEST_API_KEY }}
+        JwtSettings.Secret: ${{ secrets.SERVER_ROOT_ADDRESS }}
         
     - name: Login to Amazon ECR
       id: login-ecr
