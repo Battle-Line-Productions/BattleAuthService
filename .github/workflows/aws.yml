@@ -25,11 +25,11 @@ jobs:
     - name: App Settings Variable Substitution
       uses: microsoft/variable-substitution@v1
       with:
-        files: '/appsettings.json'
+        files: '/BattleAuth.Api/appsettings.json'
       env:
         DefaultConnection: ${{ secrets.BATTLE_AUTH_TEST_DB_CONNECTION_STRING }}
         ApiKey: ${{ secrets.BATTLE_AUTH_TEST_API_KEY }}
-        JwtSettings.Secret: ${{ secrets.SERVER_ROOT_ADDRESS }}
+        JwtSettings.Secret: ${{ secrets.BATTLE_AUTH_TEST_JWT_SECRET }}
         
     - name: Login to Amazon ECR
       id: login-ecr
