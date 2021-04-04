@@ -34,21 +34,14 @@ namespace BattleAuth.Api
             app.UseCors("CorsPolicy");
 
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseHsts();
-            }
 
             var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(swaggerOptions)).Bind(swaggerOptions);
 
-            app.UseSwagger(options =>
-            {
-                options.RouteTemplate = swaggerOptions.JsonRoute;
-            });
+            app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });
 
             app.UseSwaggerUI(options =>
             {
@@ -82,10 +75,7 @@ namespace BattleAuth.Api
             app.UseAuthorization();
             app.UseAuthentication();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

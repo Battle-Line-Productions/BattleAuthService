@@ -1,6 +1,7 @@
 ﻿namespace BattleAuth.Api.Installers
 {
     using System;
+    using Contracts.Domain.V1;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -17,8 +18,7 @@
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
+            services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -29,7 +29,7 @@
                         m.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null!);
                         m.CharSetBehavior(CharSetBehavior.AppendToAllColumns);
                         m.CharSet(CharSet.Latin1);
-                    }).UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole().AddFilter(level => level >= LogLevel.Information)))
+                    }).UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole().AddFilter(level => level >= LogLevel.Debug)))
                     .EnableSensitiveDataLogging().EnableDetailedErrors();
             });
         }
