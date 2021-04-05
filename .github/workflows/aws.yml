@@ -14,17 +14,22 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      
-    - uses: actions/setup-dotnet@v1
-      with:
-        source-url: https://pkgs.dev.azure.com/pomelo-efcore/Pomelo.EntityFrameworkCore.MySql/_packaging/pomelo-efcore-public/nuget/v3/index.json
-      
+         
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
+
+    - name: App Settings Variable Substitution
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: 'BattleAuth.Api/appsettings.Production.json'
+      env:
+        DefaultConnection: ${{ secrets.BATTLE_AUTH_TEST_DB_CONNECTION_STRING }}
+        ApiKey: ${{ secrets.BATTLE_AUTH_TEST_API_KEY }}
+        JwtSettings.Secret: ${{ secrets.BATTLE_AUTH_TEST_JWT_SECRET }}
         
     - name: Login to Amazon ECR
       id: login-ecr
