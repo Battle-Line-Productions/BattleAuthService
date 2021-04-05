@@ -15,6 +15,7 @@
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration["DefaultConnection"];
+            Console.WriteLine($"connectionString is {connectionString}");
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 

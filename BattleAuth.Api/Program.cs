@@ -5,7 +5,6 @@ namespace BattleAuth.Api
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Service;
@@ -17,10 +16,6 @@ namespace BattleAuth.Api
             var host = CreateWebHostBuilder(args).Build();
 
             using var serviceScope = host.Services.CreateScope();
-            var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>();
-            var configuration = serviceScope.ServiceProvider.GetRequiredService<IConfiguration>();
-            var connectionString = configuration["DefaultConnection"];
-            logger.LogInformation($"the connection string is {connectionString}");
             var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             await dbContext.Database.MigrateAsync();
