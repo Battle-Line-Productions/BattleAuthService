@@ -16,6 +16,8 @@
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddLogging();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
