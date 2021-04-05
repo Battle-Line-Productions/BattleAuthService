@@ -17,11 +17,11 @@ namespace BattleAuth.Api
             var host = CreateWebHostBuilder(args).Build();
 
             using var serviceScope = host.Services.CreateScope();
-            var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>();
             var configuration = serviceScope.ServiceProvider.GetRequiredService<IConfiguration>();
             var connectionString = configuration["DefaultConnection"];
             logger.LogInformation($"the connection string is {connectionString}");
+            var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             await dbContext.Database.MigrateAsync();
 
