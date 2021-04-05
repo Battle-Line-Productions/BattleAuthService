@@ -12,17 +12,9 @@
 
     public class DbInstaller : IInstaller
     {
-        private readonly ILogger _logger;
-
-        public DbInstaller(ILogger logger)
-        {
-            _logger = logger;
-        }
-
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration["DefaultConnection"];
-            _logger.LogInformation($"The connection string is: {connectionString}");
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
