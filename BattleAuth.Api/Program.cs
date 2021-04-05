@@ -6,6 +6,7 @@ namespace BattleAuth.Api
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Service;
 
     public class Program
@@ -44,6 +45,11 @@ namespace BattleAuth.Api
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddDebug();
+                    logging.AddConsole();
+                })
                 .UseStartup<Startup>();
     }
 }
