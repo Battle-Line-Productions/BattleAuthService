@@ -30,11 +30,8 @@ namespace BattleAuth.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var connectionString = Configuration["DefaultConnection"];
-            logger.LogInformation($"the connection string is {connectionString}");
-
             app.UseCors("CorsPolicy");
 
             if (env.IsDevelopment())
