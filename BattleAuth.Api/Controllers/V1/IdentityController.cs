@@ -30,20 +30,6 @@
         [ProducesResponseType(typeof(Response<AccountCreationFailedResponse>), 400)]
         public async Task<IActionResult> Register([FromBody] UserRegistrationRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return ApiResponse.GetActionResult(ResultStatus.Error400,
-                    new Response<AccountCreationFailedResponse>()
-                    {
-                        Data = new AccountCreationFailedResponse()
-                        {
-                            Success = false,
-                            Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
-                        }
-                    });
-
-            }
-
             var authResponse = await _identityService.Register(request.Email, request.Password);
 
             if (!authResponse.Success)
