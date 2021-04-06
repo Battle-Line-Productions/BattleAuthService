@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
 
-    public class AuthFailedResponse
+    public class VerifyEmailFailResponse
     {
         public IEnumerable<string> Errors { get; set; }
     }

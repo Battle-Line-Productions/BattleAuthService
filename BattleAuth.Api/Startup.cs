@@ -73,6 +73,7 @@ namespace BattleAuth.Api
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
                 }
             });
+
             app.UseAuthorization();
             app.UseAuthentication();
 

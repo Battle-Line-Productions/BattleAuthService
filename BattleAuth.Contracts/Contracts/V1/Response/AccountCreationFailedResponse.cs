@@ -2,8 +2,10 @@
 {
     using System.Collections.Generic;
 
-    public class AuthFailedResponse
+    public class AccountCreationFailedResponse
     {
+        public bool Success { get; set; }
+
         public IEnumerable<string> Errors { get; set; }
     }
 }

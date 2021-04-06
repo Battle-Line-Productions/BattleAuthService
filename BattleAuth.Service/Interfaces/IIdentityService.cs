@@ -5,10 +5,11 @@
 
     public interface IIdentityService
     {
-        Task<AuthenticationResult> Register(string email, string password);
+        Task<AccountCreationResult> Register(string email, string password);
 
         Task<AuthenticationResult> Login(string email, string password);
 
         Task<AuthenticationResult> Refresh(string token, string refreshToken);
+        Task<VerifyEmailResult> VerifyEmail(string email, string code);
     }
 }

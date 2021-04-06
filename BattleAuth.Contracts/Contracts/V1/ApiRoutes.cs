@@ -16,6 +16,8 @@
 
             public const string Refresh = Base + "/identity/refresh";
 
+            public const string VerifyEmail = Base + "/identity/verifyEmail";
+
             public const string FacebookAuth = Base + "/identity/auth/fb";
         }
     }

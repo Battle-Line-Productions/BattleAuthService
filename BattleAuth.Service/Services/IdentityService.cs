@@ -12,24 +12,27 @@
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
 
-        public IdentityService(UserManager<User> userManager, ApplicationDbContext context, IJwtService jwtService)
+        public IdentityService(UserManager<User> userManager, ApplicationDbContext context, IJwtService jwtService, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _context = context;
             _jwtService = jwtService;
+            _signInManager = signInManager;
         }
 
-        public async Task<AuthenticationResult> Register(string email, string password)
+        public async Task<AccountCreationResult> Register(string email, string password)
         {
             var existingUser = await _userManager.FindByEmailAsync(email);
 
             if (existingUser != null)
             {
-                return new AuthenticationResult
+                return new AccountCreationResult
                 {
+                    Success = false,
                     Errors = new[] { "User with this email address already exists" }
                 };
             }
@@ -45,13 +48,22 @@
 
             if (!createdUser.Succeeded)
             {
-                return new AuthenticationResult
+                return new AccountCreationResult
                 {
+                    Success = false,
                     Errors = createdUser.Errors.Select(x => x.Description)
                 };
             }
 
-            return await GenerateAuthenticationResultForUser(newUser);
+            var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+
+            //TODO: send confirmation email here
+
+            return new AccountCreationResult()
+            {
+                Success = true,
+                EmailConfirmationCode = emailConfirmationCode
+            };
         }
 
         public async Task<AuthenticationResult> Login(string email, string password)
@@ -66,9 +78,9 @@
                 };
             }
 
-            var userHasValidPassword = await _userManager.CheckPasswordAsync(user, password);
+            var userHasValidPassword = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
-            if (!userHasValidPassword)
+            if (!userHasValidPassword.Succeeded)
             {
                 return new AuthenticationResult
                 {
@@ -133,6 +145,38 @@
 
             var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
             return await GenerateAuthenticationResultForUser(user);
+        }
+
+        public async Task<VerifyEmailResult> VerifyEmail(string email, string code)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return new VerifyEmailResult()
+                {
+                    Success = false,
+                    Errors = new[] {"User does not exist"}
+                };
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (!result.Succeeded)
+            {
+                return new VerifyEmailResult()
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(x => x.Description)
+                };
+            }
+
+            //TODO: Send welcome email here
+
+            return new VerifyEmailResult()
+            {
+                Success = true
+            };
         }
 
         private async Task<AuthenticationResult> GenerateAuthenticationResultForUser(User user)

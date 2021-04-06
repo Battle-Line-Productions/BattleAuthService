@@ -19,7 +19,10 @@
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentity<User, IdentityRole>(options =>
+                {
+                    options.SignIn.RequireConfirmedEmail = true;
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
