@@ -160,7 +160,7 @@
         private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
         {
             return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
-                   jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                   jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256,
                        StringComparison.InvariantCultureIgnoreCase);
         }
 
@@ -186,7 +186,7 @@
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.Add(_jwtSettings.TokenLifetime),
                 SigningCredentials =
-                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.RsaSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
