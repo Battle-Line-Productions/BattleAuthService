@@ -8,6 +8,8 @@
 
         public string RefreshToken { get; set; }
 
+        public long ExpiresAt { get; set; }
+
         public bool Success { get; set; }
 
         public IEnumerable<string> Errors { get; set; }

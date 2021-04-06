@@ -29,7 +29,8 @@ jobs:
       env:
         DefaultConnection: ${{ secrets.BATTLE_AUTH_TEST_DB_CONNECTION_STRING }}
         ApiKey: ${{ secrets.BATTLE_AUTH_TEST_API_KEY }}
-        JwtSettings.Secret: ${{ secrets.BATTLE_AUTH_TEST_JWT_SECRET }}
+        JwtSettings.Private: ${{ secrets.BATTLE_AUTH_JWT_PRIVATE }}
+        JwtSettings.Public: ${{ secrets.BATTLE_AUTH_JWT_PUBLIC }}
         
     - name: Login to Amazon ECR
       id: login-ecr

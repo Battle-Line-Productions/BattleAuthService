@@ -1,32 +1,25 @@
 ﻿namespace BattleAuth.Service.Services
 {
     using System;
-    using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
     using System.Linq;
-    using System.Security.Claims;
-    using System.Text;
     using System.Threading.Tasks;
     using Contracts.Domain.V1;
-    using Contracts.Options;
     using Interfaces;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.IdentityModel.Tokens;
 
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<User> _userManager;
-        private readonly JwtSettings _jwtSettings;
-        private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly ApplicationDbContext _context;
+        private readonly IJwtService _jwtService;
 
-        public IdentityService(UserManager<User> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, ApplicationDbContext context)
+        public IdentityService(UserManager<User> userManager, ApplicationDbContext context, IJwtService jwtService)
         {
             _userManager = userManager;
-            _jwtSettings = jwtSettings;
-            _tokenValidationParameters = tokenValidationParameters;
             _context = context;
+            _jwtService = jwtService;
         }
 
         public async Task<AuthenticationResult> Register(string email, string password)
@@ -88,7 +81,7 @@
 
         public async Task<AuthenticationResult> Refresh(string token, string refreshToken)
         {
-            var validatedToken = GetPrincipalFromToken(token);
+            var validatedToken = _jwtService.GetPrincipalFromToken(token);
 
             if (validatedToken == null)
             {
@@ -142,58 +135,20 @@
             return await GenerateAuthenticationResultForUser(user);
         }
 
-        private ClaimsPrincipal GetPrincipalFromToken(string token)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            try
-            {
-                var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
-                return !IsJwtWithValidSecurityAlgorithm(validatedToken) ? null : principal;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
-        {
-            return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
-                   jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256,
-                       StringComparison.InvariantCultureIgnoreCase);
-        }
-
         private async Task<AuthenticationResult> GenerateAuthenticationResultForUser(User user)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("id", user.Id)
-            };
+            var now = DateTime.UtcNow;
+            var unixTimeSeconds = new DateTimeOffset(now).ToUnixTimeSeconds();
 
             var userClaims = await _userManager.GetClaimsAsync(user);
 
-            claims.AddRange(userClaims);
+            var jwtClaims = _jwtService.BuildClaims(userClaims, user, now, unixTimeSeconds);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.Add(_jwtSettings.TokenLifetime),
-                SigningCredentials =
-                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.RsaSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwtSecurityToken = _jwtService.CreateToken(jwtClaims, now, unixTimeSeconds);
 
             var refreshToken = new RefreshToken
             {
-                JwtId = token.Id,
+                JwtId = jwtSecurityToken.Token.Id,
                 UserId = user.Id,
                 CreationDate = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddMonths(1),
@@ -206,7 +161,8 @@
             return new AuthenticationResult
             {
                 Success = true,
-                Token = tokenHandler.WriteToken(token),
+                Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken.Token),
+                ExpiresAt = unixTimeSeconds,
                 RefreshToken = refreshToken.Token
             };
         }
