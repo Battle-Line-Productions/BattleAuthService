@@ -148,7 +148,7 @@
 
             var refreshToken = new RefreshToken
             {
-                JwtId = jwtSecurityToken.Token.Id,
+                JwtId = jwtSecurityToken.Id,
                 UserId = user.Id,
                 CreationDate = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddMonths(1),
@@ -161,7 +161,7 @@
             return new AuthenticationResult
             {
                 Success = true,
-                Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken.Token),
+                Token = jwtSecurityToken.Token,
                 ExpiresAt = unixTimeSeconds,
                 RefreshToken = refreshToken.Token
             };

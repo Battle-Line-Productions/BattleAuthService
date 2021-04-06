@@ -8,7 +8,7 @@
         public UserLoginRequestValidator()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
-            RuleFor(x => x.Password).NotEmpty().MaximumLength(128).MinimumLength(8).Equal(y => y.PasswordConfirmation);
+            RuleFor(x => x.Password).NotEmpty().MaximumLength(128).MinimumLength(8);
         }
     }
 }

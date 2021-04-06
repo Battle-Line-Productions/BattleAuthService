@@ -46,17 +46,20 @@
                     CryptoProviderFactory = new CryptoProviderFactory() { CacheSignatureProviders = false }
                 };
 
+            var jwt = new JwtSecurityToken(
+                audience: _jwtSettings.Audience,
+                issuer: _jwtSettings.Audience,
+                claims: claims,
+                notBefore: now,
+                expires: now.AddMinutes(60),
+                signingCredentials: signingCredentials);
+
 
             return new JwtResponse()
             {
-                Token = new JwtSecurityToken(
-                    audience: _jwtSettings.Audience,
-                    issuer: _jwtSettings.Audience,
-                    claims: claims,
-                    notBefore: now,
-                    expires: now.AddMinutes(60),
-                    signingCredentials: signingCredentials),
-                ExpiresAt = expiresAt
+                Token = new JwtSecurityTokenHandler().WriteToken(jwt),
+                ExpiresAt = expiresAt,
+                Id = jwt.Id
             };
         }
 
@@ -69,8 +72,9 @@
                 var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
                 return !IsJwtWithValidSecurityAlgorithm(validatedToken) ? null : principal;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return null;
             }
         }

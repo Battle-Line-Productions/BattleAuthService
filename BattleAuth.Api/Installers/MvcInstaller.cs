@@ -28,8 +28,8 @@
             configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
 
-            services.AddTransient<IJwtService, JwtService>();
-            services.AddTransient<IIdentityService, IdentityService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IIdentityService, IdentityService>();
 
             services
                 .AddMvc(options =>
@@ -43,7 +43,7 @@
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            using RSA rsa = RSA.Create();
+            RSA rsa = RSA.Create();
             rsa.ImportRSAPublicKey(jwtSettings.Public.ToByteArray(), out _);
 
             var tokenValidationParameters = new TokenValidationParameters
