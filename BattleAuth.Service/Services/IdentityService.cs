@@ -1,13 +1,19 @@
 ﻿namespace BattleAuth.Service.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
     using System.Linq;
     using System.Threading.Tasks;
+    using BattleNotifications.Contracts.Contracts.V1.Requests;
+    using BattleNotifications.Contracts.Domain.V1;
+    using BattleNotifications.Sdk;
     using Contracts.Domain.V1;
+    using Contracts.Options;
     using Interfaces;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Refit;
 
     public class IdentityService : IIdentityService
     {
@@ -15,13 +21,15 @@
         private readonly SignInManager<User> _signInManager;
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
+        private readonly NotificationSettings _notificationSettings;
 
-        public IdentityService(UserManager<User> userManager, ApplicationDbContext context, IJwtService jwtService, SignInManager<User> signInManager)
+        public IdentityService(UserManager<User> userManager, ApplicationDbContext context, IJwtService jwtService, SignInManager<User> signInManager, NotificationSettings notificationSettings)
         {
             _userManager = userManager;
             _context = context;
             _jwtService = jwtService;
             _signInManager = signInManager;
+            _notificationSettings = notificationSettings;
         }
 
         public async Task<AccountCreationResult> Register(string email, string password)
@@ -57,7 +65,31 @@
 
             var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
-            //TODO: send confirmation email here
+            var notificationsApi = RestService.For<INotificationApi>(_notificationSettings.Url);
+
+            var newUserEmailResponse = await notificationsApi.SendEmailAsync(new EmailSendRequest()
+            {
+                To = newUser.Email,
+                From = "noreply@battlelineproductions.com",
+                TemplateChoice = EmailTemplateChoices.ConfirmAccount,
+                TemplateData = new List<KeyValueTemplatePairs>()
+                {
+                    new KeyValueTemplatePairs()
+                    {
+                        Key = "Code",
+                        Value = emailConfirmationCode
+                    }
+                }
+            }, _notificationSettings.ApiKey);
+
+            if (!newUserEmailResponse.IsSuccessStatusCode)
+            {
+                return new AccountCreationResult
+                {
+                    Success = false,
+                    Errors = new []{ "Failed to send account confirmation email. You will not be able to log in without this and should try to create account again." }
+                };
+            }
 
             return new AccountCreationResult()
             {
@@ -171,7 +203,15 @@
                 };
             }
 
-            //TODO: Send welcome email here
+            var notificationsApi = RestService.For<INotificationApi>(_notificationSettings.Url);
+
+            // If this failed we are not going to stop account verification and will later log an error somewhere for an admin to work through.
+            await notificationsApi.SendEmailAsync(new EmailSendRequest()
+            {
+                To = user.Email,
+                From = "noreply@battlelineproductions.com",
+                TemplateChoice = EmailTemplateChoices.NewAccount
+            }, _notificationSettings.ApiKey);
 
             return new VerifyEmailResult()
             {

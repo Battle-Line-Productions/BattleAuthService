@@ -28,6 +28,10 @@
             configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
 
+            var notificationSettings = new NotificationSettings();
+            configuration.Bind(nameof(NotificationSettings), notificationSettings);
+            services.AddSingleton(notificationSettings);
+
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IIdentityService, IdentityService>();
 
