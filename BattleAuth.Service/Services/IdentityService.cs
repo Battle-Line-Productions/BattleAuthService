@@ -67,11 +67,11 @@
 
             var notificationsApi = RestService.For<INotificationApi>(_notificationSettings.Url);
 
-            var newUserEmailResponse = await notificationsApi.SendEmailAsync(new EmailSendRequest()
+            var sendEmailResponse = await notificationsApi.SendEmailAsync(new EmailSendRequest()
             {
                 To = newUser.Email,
                 From = "noreply@battlelineproductions.com",
-                TemplateChoice = EmailTemplateChoices.ConfirmAccount,
+                TemplateChoice = "ConfirmAccount",
                 TemplateData = new List<KeyValueTemplatePairs>()
                 {
                     new KeyValueTemplatePairs()
@@ -81,15 +81,6 @@
                     }
                 }
             }, _notificationSettings.ApiKey);
-
-            if (!newUserEmailResponse.IsSuccessStatusCode)
-            {
-                return new AccountCreationResult
-                {
-                    Success = false,
-                    Errors = new []{ "Failed to send account confirmation email. You will not be able to log in without this and should try to create account again." }
-                };
-            }
 
             return new AccountCreationResult()
             {
@@ -206,11 +197,11 @@
             var notificationsApi = RestService.For<INotificationApi>(_notificationSettings.Url);
 
             // If this failed we are not going to stop account verification and will later log an error somewhere for an admin to work through.
-            await notificationsApi.SendEmailAsync(new EmailSendRequest()
+            var welcomeEmailResult = await notificationsApi.SendEmailAsync(new EmailSendRequest()
             {
                 To = user.Email,
                 From = "noreply@battlelineproductions.com",
-                TemplateChoice = EmailTemplateChoices.NewAccount
+                TemplateChoice = "NewAccount"
             }, _notificationSettings.ApiKey);
 
             return new VerifyEmailResult()
