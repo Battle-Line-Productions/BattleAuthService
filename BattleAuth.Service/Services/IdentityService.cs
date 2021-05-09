@@ -210,6 +210,75 @@
             };
         }
 
+        public async Task<ForgotPasswordResult> ForgotPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return new ForgotPasswordResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User does not exist" }
+                };
+            }
+
+            var resetCode = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var notificationsApi = RestService.For<INotificationApi>(_notificationSettings.Url);
+
+            // If this failed we are not going to stop account verification and will later log an error somewhere for an admin to work through.
+            var welcomeEmailResult = await notificationsApi.SendEmailAsync(new EmailSendRequest()
+            {
+                To = user.Email,
+                From = "noreply@battlelineproductions.com",
+                TemplateChoice = "ForgotPassword",
+                TemplateData = new List<KeyValueTemplatePairs>()
+                {
+                    new KeyValueTemplatePairs()
+                    {
+                        Key = "Code",
+                        Value = resetCode
+                    }
+                }
+            }, _notificationSettings.ApiKey);
+
+            return new ForgotPasswordResult()
+            {
+                Success = true
+            };
+        }
+
+        public async Task<ResetPasswordResult> ResetPassword(string email, string code, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return new ResetPasswordResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User does not exist" }
+                };
+            }
+
+            var resetResult = await _userManager.ResetPasswordAsync(user, code, newPassword);
+
+            if (!resetResult.Succeeded)
+            {
+                return new ResetPasswordResult()
+                {
+                    Success = false,
+                    Errors = resetResult.Errors.Select(x => x.Description)
+                };
+            }
+
+            return new ResetPasswordResult()
+            {
+                Success = true
+            };
+        }
+
         private async Task<AuthenticationResult> GenerateAuthenticationResultForUser(User user)
         {
             var now = DateTime.UtcNow;

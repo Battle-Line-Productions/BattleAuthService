@@ -18,6 +18,10 @@
 
             public const string VerifyEmail = Base + "/identity/verifyEmail";
 
+            public const string ForgotPassword = Base + "/identity/forgotPassword";
+
+            public const string ResetPassword = Base + "/identity/resetPassword";
+
             public const string FacebookAuth = Base + "/identity/auth/fb";
         }
     }

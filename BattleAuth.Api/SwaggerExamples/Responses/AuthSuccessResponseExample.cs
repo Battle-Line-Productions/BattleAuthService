@@ -1,6 +1,7 @@
 ﻿namespace BattleAuth.Api.SwaggerExamples.Responses
 {
     using Contracts.Contracts.V1.Response;
+    using Contracts.Contracts.V1.Response.Success;
     using Swashbuckle.AspNetCore.Filters;
 
     public class AuthSuccessResponseExample : IExamplesProvider<AuthSuccessResponse>

@@ -11,7 +11,6 @@ namespace BattleAuth.Api
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     public class Startup

@@ -5,6 +5,8 @@
     using Contracts.Contracts.V1;
     using Contracts.Contracts.V1.Requests;
     using Contracts.Contracts.V1.Response;
+    using Contracts.Contracts.V1.Response.Fail;
+    using Contracts.Contracts.V1.Response.Success;
     using Contracts.Domain.V1;
     using Microsoft.AspNetCore.Mvc;
     using Service.Interfaces;
@@ -134,17 +136,17 @@
         /// Is used to verify a users email is a valid email after registering an account
         /// </summary>
         /// <response code="200">Successfully verified users account</response>
-        /// <response code="400">User not found</response>
+        /// <response code="404">User not found</response>
         [HttpPost(ApiRoutes.Identity.VerifyEmail)]
         [ProducesResponseType(typeof(Response<VerifyEmailResponse>), 200)]
-        [ProducesResponseType(typeof(Response<VerifyEmailFailResponse>), 400)]
+        [ProducesResponseType(typeof(Response<VerifyEmailFailResponse>), 404)]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
         {
             var verifyResponse = await _identityService.VerifyEmail(request.Email, request.code);
 
             if (!verifyResponse.Success)
             {
-                return ApiResponse.GetActionResult(ResultStatus.Error400,
+                return ApiResponse.GetActionResult(ResultStatus.Error404,
                     new Response<VerifyEmailFailResponse>()
                     {
                         Data = new VerifyEmailFailResponse()
@@ -161,6 +163,76 @@
                     {
                         Message =
                             "Your account has been successfully Verified. You are now able to log in."
+                    }
+                });
+        }
+
+        /// <summary>
+        /// Is used for a user to request a password reset for their account
+        /// </summary>
+        /// <response code="200">Successfully sent email for password reset</response>
+        /// <response code="404">User not found</response>
+        [HttpPost(ApiRoutes.Identity.ForgotPassword)]
+        [ProducesResponseType(typeof(Response<ForgotPasswordSuccessResponse>), 200)]
+        [ProducesResponseType(typeof(Response<ForgotPasswordFailResponse>), 404)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var passwordForgotResponse = await _identityService.ForgotPassword(request.Email);
+
+            if (!passwordForgotResponse.Success)
+            {
+                return ApiResponse.GetActionResult(ResultStatus.Error404,
+                    new Response<ForgotPasswordFailResponse>()
+                    {
+                        Data = new ForgotPasswordFailResponse()
+                        {
+                            Errors = passwordForgotResponse.Errors
+                        }
+                    });
+            }
+
+            return ApiResponse.GetActionResult(ResultStatus.Ok200,
+                new Response<ForgotPasswordSuccessResponse>()
+                {
+                    Data = new ForgotPasswordSuccessResponse()
+                    {
+                        Message =
+                            "Please check your email for a code/link to reset your password."
+                    }
+                });
+        }
+
+        /// <summary>
+        /// Used to reset a users password after hey have obtained a reset code
+        /// </summary>
+        /// <response code="200">Successfully reset the users password</response>
+        /// <response code="404">User not found</response>
+        [HttpPost(ApiRoutes.Identity.ResetPassword)]
+        [ProducesResponseType(typeof(Response<ResetPasswordSuccessResponse>), 200)]
+        [ProducesResponseType(typeof(Response<ResetPasswordFailResponse>), 404)]
+        public async Task<IActionResult> ResetPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var passwordResetResponse = await _identityService.ForgotPassword(request.Email);
+
+            if (!passwordResetResponse.Success)
+            {
+                return ApiResponse.GetActionResult(ResultStatus.Error404,
+                    new Response<ResetPasswordFailResponse>()
+                    {
+                        Data = new ResetPasswordFailResponse()
+                        {
+                            Errors = passwordResetResponse.Errors
+                        }
+                    });
+            }
+
+            return ApiResponse.GetActionResult(ResultStatus.Ok200,
+                new Response<ResetPasswordSuccessResponse>()
+                {
+                    Data = new ResetPasswordSuccessResponse()
+                    {
+                        Message =
+                            "Your password has been successfully reset."
                     }
                 });
         }

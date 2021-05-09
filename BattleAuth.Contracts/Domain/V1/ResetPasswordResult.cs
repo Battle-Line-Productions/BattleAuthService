@@ -1,8 +1,8 @@
-﻿namespace BattleAuth.Contracts.Contracts.V1.Response
+﻿namespace BattleAuth.Contracts.Domain.V1
 {
     using System.Collections.Generic;
 
-    public class AccountCreationFailedResponse
+    public class ResetPasswordResult
     {
         public bool Success { get; set; }
 

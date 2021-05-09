@@ -7,7 +7,6 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
     using Service;
 
     public class DbInstaller : IInstaller
@@ -15,9 +14,6 @@
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration["DefaultConnection"];
-            Console.WriteLine($"connectionString is {connectionString}");
-
-            services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddIdentity<User, IdentityRole>(options =>
                 {
@@ -28,14 +24,14 @@
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseMySql(connectionString, new MySqlServerVersion(new Version(5, 7, 12)), m =>
+                options.UseNpgsql(connectionString, b =>
                     {
-                        m.MigrationsAssembly("BattleAuth.Api");
-                        m.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null!);
-                        m.CharSetBehavior(CharSetBehavior.AppendToAllColumns);
-                        m.CharSet(CharSet.Latin1);
-                    }).UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole().AddFilter(level => level >= LogLevel.Debug)))
-                    .EnableSensitiveDataLogging().EnableDetailedErrors();
+                        b.MigrationsAssembly("BattleAuth.Api");
+                        b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
+                    })
+                    .UseSnakeCaseNamingConvention()
+                    .UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole().AddFilter(level => level >= LogLevel.Debug)))
+                    .EnableDetailedErrors();
             });
         }
     }
